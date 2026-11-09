@@ -1,0 +1,5 @@
+.spotify_token
+.venv/
+__pycache__/
+run.log
+*.plist
