@@ -36,7 +36,7 @@ git commit -m "Daily AI playlist"
 gh repo create daily-ai-playlist --private --source=. --push
 ```
 
-Keep the repo **private**. It's free, and the daily run uses about 1 minute of your 2,000 free monthly Actions minutes.
+The repo can be public or private. Your Spotify keys live in GitHub secrets, which are never shown, even on a public repo. On a public repo, though, anyone can read the run logs and `state.json`, so they can see which episodes get added. Actions minutes are free on public repos. On a private repo the daily run uses about 1 minute of your 2,000 free monthly minutes.
 
 ## 4. Add the secrets
 
