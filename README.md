@@ -33,7 +33,7 @@ Check which GitHub account the `gh` command is using first. You probably want yo
 gh auth status                  # if it shows your work account: gh auth login
 git init && git add . && git status   # .spotify_token must NOT be in the list
 git commit -m "Daily AI playlist"
-gh repo create daily-ai-playlist --private --source=. --push
+gh repo create daily-ai-playlist --public --source=. --push
 ```
 
 The repo can be public or private. Your Spotify keys live in GitHub secrets, which are never shown, even on a public repo. On a public repo, though, anyone can read the run logs and `state.json`, so they can see which episodes get added. Actions minutes are free on public repos. On a private repo the daily run uses about 1 minute of your 2,000 free monthly minutes.
