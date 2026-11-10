@@ -137,20 +137,28 @@ def run(sp, dry_run=False, today=None):
 
     # 1 & 2: clean out finished and stale episodes
     items = sp.playlist_items(pid, additional_types=("episode",), market=MARKET)
+    # Playlist items already carry release_date, duration_ms and resume_point,
+    # so no extra lookup is needed. (Spotify blocks the batch GET /episodes?ids=
+    # for newer apps; only fall back to a single-episode lookup if a field is missing.)
     in_playlist = []
     for it in paged(sp, items):
         obj = it.get("track") or it.get("item")
         if obj and obj.get("type") == "episode":
-            in_playlist.append(obj["id"])
+            in_playlist.append(obj)
 
     remove = []
-    for i in range(0, len(in_playlist), 50):
-        for ep in sp.episodes(in_playlist[i:i + 50], market=MARKET)["episodes"]:
-            if not ep:
+    for ep in in_playlist:
+        if "resume_point" not in ep or not ep.get("release_date"):
+            try:
+                ep = sp.episode(ep["id"], market=MARKET) or ep
+            except spotipy.SpotifyException as e:
+                print(f"  (couldn't look up '{ep.get('name')}': {e.http_status}; skipping)")
                 continue
-            age = (today - parse_date(ep["release_date"])).days
-            if listened(ep) or (MAX_AGE_DAYS and age > MAX_AGE_DAYS):
-                remove.append(ep)
+        if not ep.get("release_date"):
+            continue
+        age = (today - parse_date(ep["release_date"])).days
+        if listened(ep) or (MAX_AGE_DAYS and age > MAX_AGE_DAYS):
+            remove.append(ep)
     if remove:
         print("Removing:", *[f"  - {e['name']}" for e in remove], sep="\n")
         if not dry_run:
