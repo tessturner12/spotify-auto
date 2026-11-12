@@ -1,65 +1,33 @@
 # Daily AI playlist
 
-Keeps your Spotify playlist "daily ai" stocked with new podcast episodes. It runs every morning on GitHub, so your laptop doesn't need to be on. Each run:
+A small tool that keeps one Spotify playlist filled with fresh AI and tech podcast episodes, so there's always something new to listen to without hunting for it.
 
-- **Adds** episodes released in the last 2 days, at the top. The playlist is always ordered most recently added first.
-- **Removes** episodes you've listened to: either marked played, or stopped within 2 minutes of the end.
-- **Removes** unplayed episodes once they're 14 days old.
+## The problem
 
-Anything you remove by hand stays removed.
+Following ten or so daily and weekly podcasts on Spotify gets messy. New episodes are spread across different show pages. Ones you've already heard stay in your queue. Old ones you never got to pile up until the list is hard to use. Keeping a single "listen next" playlist tidy by hand takes a few minutes every day, and it's easy to let it slide.
 
-## 1. Create a Spotify app (once)
+## What it does
 
-Go to https://developer.spotify.com/dashboard and click **Create app**. Add this Redirect URI: `http://127.0.0.1:8888/callback`. Then copy the **Client ID** and **Client secret**.
+Every morning it tidies a Spotify playlist called **daily ai**:
 
-## 2. Run setup on your Mac (once)
+- **Adds new episodes.** Anything released in the last two days from the shows it follows goes to the top, so the newest is always first.
+- **Removes what you've finished.** Episodes you've marked as played, or stopped within the last couple of minutes, are taken off.
+- **Clears out old episodes.** Anything still unplayed after two weeks is removed, so the list never gets stale.
+- **Respects your edits.** If you remove an episode yourself, it won't come back.
 
-```bash
-cd ~/spotify-daily-ai                      # wherever you saved this folder
-python3 -m venv .venv && .venv/bin/pip install spotipy
-export SPOTIPY_CLIENT_ID=paste_id SPOTIPY_CLIENT_SECRET=paste_secret
-.venv/bin/python daily_ai_playlist.py setup      # browser opens: log in to Spotify
-.venv/bin/python daily_ai_playlist.py --dry-run  # shows what it would change
-.venv/bin/python daily_ai_playlist.py token      # prints your refresh token: copy it
-```
+It runs on GitHub on a daily schedule, so it works even when your laptop is off.
 
-Setup prints the show it matched for each name. If one is wrong, open `config.json` and replace its id with the one from that show's **Share → Copy link** (the part after `/show/`).
+## Shows it follows
 
-## 3. Put it on your personal GitHub
+The AI Daily Brief, Tech Brew Ride Home, The Rundown, FT News Briefing, TBPN, Hard Fork, No Priors, Latent Space, Software Engineering Daily and TLDR AI.
 
-Check which GitHub account the `gh` command is using first. You probably want your personal one, not the Electric Twin one:
+The list lives in `config.json` and can be changed at any time.
 
-```bash
-gh auth status                  # if it shows your work account: gh auth login
-git init && git add . && git status   # .spotify_token must NOT be in the list
-git commit -m "Daily AI playlist"
-gh repo create daily-ai-playlist --public --source=. --push
-```
+## How it works
 
-The repo can be public or private. Your Spotify keys live in GitHub secrets, which are never shown, even on a public repo. On a public repo, though, anyone can read the run logs and `state.json`, so they can see which episodes get added. Actions minutes are free on public repos. On a private repo the daily run uses about 1 minute of your 2,000 free monthly minutes.
+- `daily_ai_playlist.py` is the script. It talks to Spotify to check new releases and your listening progress, then updates the playlist.
+- `config.json` lists the playlist and the shows to follow.
+- `state.json` remembers which episodes have already been added. That's how it knows not to re-add ones you've removed. It saves itself back to the repo after each run.
+- A GitHub Actions workflow runs the script every morning at 06:17 UTC.
 
-## 4. Add the secrets
-
-```bash
-gh secret set SPOTIPY_CLIENT_ID          # paste each value when asked
-gh secret set SPOTIPY_CLIENT_SECRET
-gh secret set SPOTIFY_REFRESH_TOKEN      # the token from step 2
-```
-
-Or do it on github.com: repo → **Settings → Secrets and variables → Actions → New repository secret**.
-
-## 5. Test it
-
-```bash
-gh workflow run daily.yml && gh run watch
-```
-
-Or go to the repo's **Actions** tab, open **Refresh daily ai playlist** and click **Run workflow**. After that it runs every day at 06:17 UTC on its own. GitHub can start scheduled runs a little late.
-
-## Changing it
-
-- **Settings:** `LOOKBACK_DAYS`, `MAX_AGE_DAYS` and `DONE_WITHIN_SECONDS` are at the top of `daily_ai_playlist.py`.
-- **Shows:** edit `config.json`, then commit and push.
-- **If runs start failing with an auth error:** run `token` on your Mac again and update the `SPOTIFY_REFRESH_TOKEN` secret.
-
-`state.json` is how it remembers what it has already added. The workflow saves it back to the repo after each run.
+Your Spotify login details are stored as GitHub secrets, so they never appear in the code or the run logs.
