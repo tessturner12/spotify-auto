@@ -1,4 +1,4 @@
-name: Refresh daily ai playlist
+name: Refresh daily playlist
 
 on:
   schedule:
@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install spotipy
-      - run: python daily_ai_playlist.py
+      - run: python daily_playlist.py
         env:
           SPOTIPY_CLIENT_ID: ${{ secrets.SPOTIPY_CLIENT_ID }}
           SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}

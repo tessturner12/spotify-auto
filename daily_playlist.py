@@ -11,10 +11,10 @@ Each run:
 Anything you remove by hand is remembered in state.json and never re-added.
 
 Usage:
-  python daily_ai_playlist.py setup   # first time: log in, find the playlist and shows
-  python daily_ai_playlist.py token   # print the refresh token for GitHub secrets
-  python daily_ai_playlist.py         # the daily run (what the scheduler calls)
-  python daily_ai_playlist.py --dry-run
+  python daily_playlist.py setup   # first time: log in, find the playlist and shows
+  python daily_playlist.py token   # print the refresh token for GitHub secrets
+  python daily_playlist.py         # the daily run (what the scheduler calls)
+  python daily_playlist.py --dry-run
 
 Credentials come from the environment (never commit them):
   SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, and on GitHub SPOTIFY_REFRESH_TOKEN
@@ -130,7 +130,7 @@ def setup(sp):
 def run(sp, dry_run=False, today=None):
     cfg = load(CONFIG, None)
     if not cfg:
-        sys.exit("No config.json yet - run `python daily_ai_playlist.py setup` first.")
+        sys.exit("No config.json yet - run `python daily_playlist.py setup` first.")
     state = load(STATE, {"added": {}})
     today = today or dt.date.today()
     pid = cfg["playlist_id"]
