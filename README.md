@@ -1,33 +1,18 @@
-# Daily AI playlist
+# Podcast playlist
 
-A small tool that keeps one Spotify playlist filled with fresh AI and tech podcast episodes, so there's always something new to listen to without hunting for it.
+This keeps a Spotify playlist of podcast episodes up to date automatically.
 
-## The problem
+I follow a handful of podcasts, and keeping up with them on Spotify was a chore. New episodes are scattered across different show pages, the ones I'd already listened to hung around, and older ones I never got to built up over time. I wanted one playlist I could open each morning that just had what was new.
 
-Following ten or so daily and weekly podcasts on Spotify gets messy. New episodes are spread across different show pages. Ones you've already heard stay in your queue. Old ones you never got to pile up until the list is hard to use. Keeping a single "listen next" playlist tidy by hand takes a few minutes every day, and it's easy to let it slide.
+So every morning this script goes through the shows I follow and adds anything released in the last couple of days to the top of the playlist. It also takes off episodes I've finished, and anything I haven't played after two weeks. If I remove an episode myself, it stays gone.
 
-## What it does
+It runs on a schedule with GitHub Actions, so it doesn't need my laptop to be on.
 
-Every morning it tidies a Spotify playlist called **daily ai**:
+## Files
 
-- **Adds new episodes.** Anything released in the last two days from the shows it follows goes to the top, so the newest is always first.
-- **Removes what you've finished.** Episodes you've marked as played, or stopped within the last couple of minutes, are taken off.
-- **Clears out old episodes.** Anything still unplayed after two weeks is removed, so the list never gets stale.
-- **Respects your edits.** If you remove an episode yourself, it won't come back.
+- `daily_ai_playlist.py` is the script that updates the playlist.
+- `config.json` has the playlist and the shows to follow.
+- `state.json` keeps track of what's already been added, and is saved back to the repo after each run.
+- `.github/workflows/daily.yml` runs it every morning.
 
-It runs on GitHub on a daily schedule, so it works even when your laptop is off.
-
-## Shows it follows
-
-The AI Daily Brief, Tech Brew Ride Home, The Rundown, FT News Briefing, TBPN, Hard Fork, No Priors, Latent Space, Software Engineering Daily and TLDR AI.
-
-The list lives in `config.json` and can be changed at any time.
-
-## How it works
-
-- `daily_ai_playlist.py` is the script. It talks to Spotify to check new releases and your listening progress, then updates the playlist.
-- `config.json` lists the playlist and the shows to follow.
-- `state.json` remembers which episodes have already been added. That's how it knows not to re-add ones you've removed. It saves itself back to the repo after each run.
-- A GitHub Actions workflow runs the script every morning at 06:17 UTC.
-
-Your Spotify login details are stored as GitHub secrets, so they never appear in the code or the run logs.
+Spotify login details are kept in GitHub secrets, not in the code.
